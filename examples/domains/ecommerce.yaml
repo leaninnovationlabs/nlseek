@@ -1,0 +1,206 @@
+name: ecommerce
+description: E-commerce database schema for online retail operations
+version: "1.0"
+database_type: postgres
+
+tables:
+  - name: customers
+    description: Customer account information
+    columns:
+      - name: id
+        type: integer
+        primary_key: true
+        description: Unique customer identifier
+      - name: email
+        type: varchar(255)
+        nullable: false
+        description: Customer email address (unique)
+      - name: first_name
+        type: varchar(100)
+        description: Customer first name
+      - name: last_name
+        type: varchar(100)
+        description: Customer last name
+      - name: created_at
+        type: timestamp
+        nullable: false
+        description: Account creation timestamp
+      - name: updated_at
+        type: timestamp
+        description: Last profile update timestamp
+
+  - name: products
+    description: Product catalog
+    columns:
+      - name: id
+        type: integer
+        primary_key: true
+        description: Unique product identifier
+      - name: name
+        type: varchar(255)
+        nullable: false
+        description: Product name
+      - name: description
+        type: text
+        description: Product description
+      - name: price
+        type: decimal(10,2)
+        nullable: false
+        description: Product price in USD
+      - name: category_id
+        type: integer
+        description: Reference to product category
+      - name: stock_quantity
+        type: integer
+        nullable: false
+        description: Current inventory count
+      - name: created_at
+        type: timestamp
+        nullable: false
+        description: Product creation timestamp
+
+  - name: categories
+    description: Product categories
+    columns:
+      - name: id
+        type: integer
+        primary_key: true
+        description: Unique category identifier
+      - name: name
+        type: varchar(100)
+        nullable: false
+        description: Category name
+      - name: parent_id
+        type: integer
+        description: Parent category for hierarchical structure
+
+  - name: orders
+    description: Customer orders
+    columns:
+      - name: id
+        type: integer
+        primary_key: true
+        description: Unique order identifier
+      - name: customer_id
+        type: integer
+        nullable: false
+        description: Reference to customer who placed the order
+      - name: status
+        type: varchar(50)
+        nullable: false
+        description: "Order status: pending, confirmed, shipped, delivered, cancelled"
+      - name: total_amount
+        type: decimal(10,2)
+        nullable: false
+        description: Total order amount in USD
+      - name: created_at
+        type: timestamp
+        nullable: false
+        description: Order placement timestamp
+      - name: shipped_at
+        type: timestamp
+        description: Order shipment timestamp
+
+  - name: order_items
+    description: Individual items within an order
+    columns:
+      - name: id
+        type: integer
+        primary_key: true
+        description: Unique order item identifier
+      - name: order_id
+        type: integer
+        nullable: false
+        description: Reference to parent order
+      - name: product_id
+        type: integer
+        nullable: false
+        description: Reference to product
+      - name: quantity
+        type: integer
+        nullable: false
+        description: Number of items ordered
+      - name: unit_price
+        type: decimal(10,2)
+        nullable: false
+        description: Price per unit at time of order
+
+relationships:
+  - name: customer_orders
+    from_table: orders
+    from_column: customer_id
+    to_table: customers
+    to_column: id
+    type: many_to_one
+
+  - name: order_items_order
+    from_table: order_items
+    from_column: order_id
+    to_table: orders
+    to_column: id
+    type: many_to_one
+
+  - name: order_items_product
+    from_table: order_items
+    from_column: product_id
+    to_table: products
+    to_column: id
+    type: many_to_one
+
+  - name: product_category
+    from_table: products
+    from_column: category_id
+    to_table: categories
+    to_column: id
+    type: many_to_one
+
+  - name: category_parent
+    from_table: categories
+    from_column: parent_id
+    to_table: categories
+    to_column: id
+    type: many_to_one
+
+sample_sql:
+  - description: Get all orders for a customer by email
+    sql: |
+      SELECT o.* 
+      FROM orders o
+      JOIN customers c ON o.customer_id = c.id
+      WHERE c.email = ?
+
+  - description: Get top selling products
+    sql: |
+      SELECT p.name, SUM(oi.quantity) as total_sold
+      FROM products p
+      JOIN order_items oi ON p.id = oi.product_id
+      GROUP BY p.id, p.name
+      ORDER BY total_sold DESC
+      LIMIT 10
+
+  - description: Get order details with items
+    sql: |
+      SELECT o.id as order_id, o.status, o.total_amount,
+             p.name as product_name, oi.quantity, oi.unit_price
+      FROM orders o
+      JOIN order_items oi ON o.id = oi.order_id
+      JOIN products p ON oi.product_id = p.id
+      WHERE o.id = ?
+
+  - description: Get revenue by category
+    sql: |
+      SELECT c.name as category, SUM(oi.quantity * oi.unit_price) as revenue
+      FROM categories c
+      JOIN products p ON c.id = p.category_id
+      JOIN order_items oi ON p.id = oi.product_id
+      JOIN orders o ON oi.order_id = o.id
+      WHERE o.status = 'delivered'
+      GROUP BY c.id, c.name
+      ORDER BY revenue DESC
+
+custom_instructions:
+  - "When looking up customers, prefer email over name as it is unique"
+  - "Date ranges should default to the last 30 days if not specified"
+  - "Order status values are: pending, confirmed, shipped, delivered, cancelled"
+  - "All monetary amounts are in USD"
+  - "Use 'delivered' status when calculating actual revenue"
