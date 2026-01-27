@@ -74,3 +74,6 @@ warn_unused_configs = true
 testpaths = ["tests"]
 pythonpath = ["src"]
 asyncio_mode = "auto"
+filterwarnings = [
+    "ignore:There is no current event loop:DeprecationWarning:pydantic_ai\\._utils",
+]
