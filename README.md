@@ -39,6 +39,8 @@ mypy src
 
 ### Load domain from file
 
+See [examples/domains/ecommerce.yaml](examples/domains/ecommerce.yaml) for a complete domain schema example.
+
 ```python
 from nl2query import DomainLoader, QueryResolver
 
