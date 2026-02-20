@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from nl2query.domain.models import DatabaseType, Domain
+from nlseek.domain.models import DatabaseType, Domain
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
@@ -207,7 +207,7 @@ class DomainLoader:
             >>> loader.register_from_models("mydb", [User])
             'mydb'
         """
-        from nl2query.domain.generator import generate_domain
+        from nlseek.domain.generator import generate_domain
 
         domain = generate_domain(
             name=name,

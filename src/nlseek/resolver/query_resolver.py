@@ -190,7 +190,7 @@ class QueryResolver:
         model: The AI model to use. Defaults to Claude Opus 4.5.
 
     Example:
-        >>> from nl2query.domain import DomainLoader
+        >>> from nlseek.domain import DomainLoader
         >>> loader = DomainLoader("/path/to/domains")
         >>> domain = loader.get_domain("ecommerce")
         >>> resolver = QueryResolver(domain)

@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from nl2query.domain import DomainLoader
-from nl2query.domain.loader import DomainNotFoundError, TableNotFoundError
+from nlseek.domain import DomainLoader
+from nlseek.domain.loader import DomainNotFoundError, TableNotFoundError
 
 
 @pytest.fixture

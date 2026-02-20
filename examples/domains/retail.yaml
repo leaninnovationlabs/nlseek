@@ -1,0 +1,355 @@
+name: retail
+description: Database schema for a large retail franchise with physical store locations and a national presence
+version: "1.0"
+database_type: postgres
+
+tables:
+  - name: customers
+    description: Customer account and contact information
+    columns:
+      - name: id
+        type: int
+        primary_key: true
+        description: Unique customer identifier
+      - name: first_name
+        type: nvarchar(100)
+        nullable: false
+        description: Customer first name
+      - name: last_name
+        type: nvarchar(100)
+        nullable: false
+        description: Customer last name
+      - name: email
+        type: nvarchar(255)
+        nullable: false
+        description: Customer email address (unique)
+      - name: phone
+        type: nvarchar(20)
+        description: Customer phone number
+      - name: loyalty_number
+        type: nvarchar(50)
+        description: Loyalty program membership number
+      - name: loyalty_tier
+        type: nvarchar(20)
+        description: "Loyalty tier: standard, silver, gold, platinum"
+      - name: date_of_birth
+        type: date
+        description: Customer date of birth
+      - name: zip_code
+        type: nvarchar(10)
+        description: Customer home zip code
+      - name: region_id
+        type: int
+        description: Reference to the region the customer belongs to
+      - name: created_at
+        type: datetime
+        nullable: false
+        description: Account creation timestamp
+      - name: updated_at
+        type: datetime
+        description: Last profile update timestamp
+
+  - name: categories
+    description: Hierarchical product categories
+    columns:
+      - name: id
+        type: int
+        primary_key: true
+        description: Unique category identifier
+      - name: name
+        type: nvarchar(100)
+        nullable: false
+        description: Category name
+      - name: parent_id
+        type: int
+        description: Parent category ID for hierarchical structure (null for top-level)
+      - name: description
+        type: nvarchar(500)
+        description: Category description
+
+  - name: products
+    description: Product catalog for all store locations
+    columns:
+      - name: id
+        type: int
+        primary_key: true
+        description: Unique product identifier
+      - name: sku
+        type: nvarchar(50)
+        nullable: false
+        description: Stock keeping unit code (unique)
+      - name: name
+        type: nvarchar(255)
+        nullable: false
+        description: Product name
+      - name: description
+        type: nvarchar(max)
+        description: Full product description
+      - name: category_id
+        type: int
+        description: Reference to product category
+      - name: brand
+        type: nvarchar(100)
+        description: Product brand name
+      - name: unit_price
+        type: decimal(10,2)
+        nullable: false
+        description: Standard retail price in USD
+      - name: cost_price
+        type: decimal(10,2)
+        description: Wholesale/cost price in USD
+      - name: weight_lbs
+        type: decimal(6,2)
+        description: Product weight in pounds
+      - name: is_active
+        type: bit
+        nullable: false
+        description: Whether the product is currently sold (1 = active, 0 = discontinued)
+      - name: created_at
+        type: datetime
+        nullable: false
+        description: Product record creation timestamp
+
+  - name: purchases
+    description: In-store and online purchase transactions
+    columns:
+      - name: id
+        type: int
+        primary_key: true
+        description: Unique purchase transaction identifier
+      - name: customer_id
+        type: int
+        description: Reference to the customer (nullable for guest purchases)
+      - name: store_id
+        type: int
+        nullable: false
+        description: Reference to the store location where the purchase occurred
+      - name: product_id
+        type: int
+        nullable: false
+        description: Reference to the purchased product
+      - name: quantity
+        type: int
+        nullable: false
+        description: Number of units purchased
+      - name: unit_price
+        type: decimal(10,2)
+        nullable: false
+        description: Price per unit at time of purchase in USD
+      - name: discount_amount
+        type: decimal(10,2)
+        description: Total discount applied to this line item in USD
+      - name: total_amount
+        type: decimal(10,2)
+        nullable: false
+        description: Total amount charged for this line item in USD
+      - name: payment_method
+        type: nvarchar(50)
+        description: "Payment method used: cash, credit_card, debit_card, gift_card, store_credit"
+      - name: channel
+        type: nvarchar(20)
+        nullable: false
+        description: "Sales channel: in_store, online, phone"
+      - name: purchased_at
+        type: datetime
+        nullable: false
+        description: Date and time of purchase
+
+  - name: returns
+    description: Product return transactions linked to original purchases
+    columns:
+      - name: id
+        type: int
+        primary_key: true
+        description: Unique return transaction identifier
+      - name: purchase_id
+        type: int
+        nullable: false
+        description: Reference to the original purchase transaction
+      - name: customer_id
+        type: int
+        description: Reference to the customer initiating the return
+      - name: store_id
+        type: int
+        nullable: false
+        description: Reference to the store location processing the return
+      - name: quantity_returned
+        type: int
+        nullable: false
+        description: Number of units returned
+      - name: refund_amount
+        type: decimal(10,2)
+        nullable: false
+        description: Total refund amount issued in USD
+      - name: reason
+        type: nvarchar(100)
+        description: "Return reason: defective, wrong_item, changed_mind, damaged_in_transit, other"
+      - name: condition
+        type: nvarchar(50)
+        description: "Condition of returned item: new, opened, damaged"
+      - name: refund_method
+        type: nvarchar(50)
+        description: "Refund method: original_payment, store_credit, gift_card"
+      - name: returned_at
+        type: datetime
+        nullable: false
+        description: Date and time the return was processed
+
+  - name: region_assignments
+    description: Mapping of sales regions to regional managers
+    columns:
+      - name: id
+        type: int
+        primary_key: true
+        description: Unique assignment identifier
+      - name: store_id
+        type: int
+        nullable: false
+        description: Reference to the store location
+      - name: region_id
+        type: int
+        nullable: false
+        description: Reference to the regional manager's region
+      - name: assigned_at
+        type: datetime
+        nullable: false
+        description: Date and time this store was assigned to the region
+      - name: is_active
+        type: bit
+        nullable: false
+        description: Whether this assignment is currently active (1 = active, 0 = historical)
+
+  - name: regional_managers
+    description: Regional managers responsible for overseeing store locations within a geographic region and their direct superior
+    columns:
+      - name: id
+        type: int
+        primary_key: true
+        description: Unique regional manager identifier
+      - name: first_name
+        type: nvarchar(150)
+        nullable: false
+        description: First name of the regional manager
+      - name: last_name
+        type: nvarchar(150)
+        nullable: false
+        description: Last name of the regional manager
+      - name: superior_id
+        type: int
+        description: Reference to the superior regional manager
+
+relationships:
+  - name: product_category
+    from_table: products
+    from_column: category_id
+    to_table: categories
+    to_column: id
+    type: many_to_one
+
+  - name: category_parent
+    from_table: categories
+    from_column: parent_id
+    to_table: categories
+    to_column: id
+    type: many_to_one
+
+  - name: purchase_customer
+    from_table: purchases
+    from_column: customer_id
+    to_table: customers
+    to_column: id
+    type: many_to_one
+
+  - name: purchase_product
+    from_table: purchases
+    from_column: product_id
+    to_table: products
+    to_column: id
+    type: many_to_one
+
+  - name: return_purchase
+    from_table: returns
+    from_column: purchase_id
+    to_table: purchases
+    to_column: id
+    type: many_to_one
+
+  - name: return_customer
+    from_table: returns
+    from_column: customer_id
+    to_table: customers
+    to_column: id
+    type: many_to_one
+
+  - name: region_assignment_manager
+    from_table: region_assignments
+    from_column: region_id
+    to_table: regional_managers
+    to_column: id
+    type: many_to_one
+
+sample_sql:
+  - description: Get total sales revenue by region
+    sql: |
+      SELECT rm.manager_name, rm.id AS region_id,
+             SUM(p.total_amount) AS total_revenue
+      FROM purchases p
+      JOIN region_assignments ra ON p.store_id = ra.store_id AND ra.is_active = 1
+      JOIN regional_managers rm ON ra.region_id = rm.id
+      GROUP BY rm.id, rm.manager_name
+      ORDER BY total_revenue DESC
+
+  - description: Get top selling products by category
+    sql: |
+      SELECT c.name AS category, pr.name AS product,
+             SUM(p.quantity) AS units_sold,
+             SUM(p.total_amount) AS revenue
+      FROM purchases p
+      JOIN products pr ON p.product_id = pr.id
+      JOIN categories c ON pr.category_id = c.id
+      GROUP BY c.name, pr.id, pr.name
+      ORDER BY units_sold DESC
+
+  - description: Get return rate by product
+    sql: |
+      SELECT pr.name AS product, pr.sku,
+             SUM(p.quantity) AS total_sold,
+             SUM(r.quantity_returned) AS total_returned,
+             CAST(SUM(r.quantity_returned) AS FLOAT) / NULLIF(SUM(p.quantity), 0) AS return_rate
+      FROM products pr
+      LEFT JOIN purchases p ON pr.id = p.product_id
+      LEFT JOIN returns r ON p.id = r.purchase_id
+      GROUP BY pr.id, pr.name, pr.sku
+      ORDER BY return_rate DESC
+
+  - description: Get customer purchase history with loyalty tier
+    sql: |
+      SELECT c.first_name, c.last_name, c.loyalty_tier,
+             COUNT(p.id) AS purchase_count,
+             SUM(p.total_amount) AS lifetime_value
+      FROM customers c
+      JOIN purchases p ON c.id = p.customer_id
+      GROUP BY c.id, c.first_name, c.last_name, c.loyalty_tier
+      ORDER BY lifetime_value DESC
+
+  - description: Get regional manager hierarchy and region performance
+    sql: |
+      SELECT rm.manager_name, rm.superior_name,
+             COUNT(DISTINCT ra.store_id) AS stores_managed,
+             SUM(p.total_amount) AS region_revenue
+      FROM regional_managers rm
+      JOIN region_assignments ra ON rm.id = ra.region_id AND ra.is_active = 1
+      JOIN purchases p ON ra.store_id = p.store_id
+      GROUP BY rm.id, rm.manager_name, rm.superior_name
+      ORDER BY region_revenue DESC
+
+custom_instructions:
+  - "Monetary amounts are always in USD"
+  - "When filtering by date ranges, default to the last 30 days if not specified"
+  - "Guest purchases have a NULL customer_id in the purchases table"
+  - "Only use region_assignments records where is_active = 1 unless historical data is requested"
+  - "Product is_active = 1 means currently sold; is_active = 0 means discontinued"
+  - "Loyalty tier values are: standard, silver, gold, platinum"
+  - "Sales channel values are: in_store, online, phone"
+  - "Return reason values are: defective, wrong_item, changed_mind, damaged_in_transit, other"
+  - "Recursively reference the regional_managers table to find the complete reporting heirarchy of regional managers"

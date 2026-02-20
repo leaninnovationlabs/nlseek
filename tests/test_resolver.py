@@ -6,9 +6,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from nl2query.domain import DomainLoader
-from nl2query.resolver import QueryResolver, SQLQueryResult
-from nl2query.resolver.query_resolver import _build_system_prompt, _get_database_hints
+from nlseek.domain import DomainLoader
+from nlseek.resolver import QueryResolver, SQLQueryResult
+from nlseek.resolver.query_resolver import _build_system_prompt, _get_database_hints
 
 
 @pytest.fixture
@@ -239,20 +239,20 @@ class TestDatabaseTypeInPrompt:
 class TestQueryResolver:
     """Tests for QueryResolver class."""
 
-    @patch("nl2query.resolver.query_resolver.Agent")
+    @patch("nlseek.resolver.query_resolver.Agent")
     def test_resolver_initialization(self, mock_agent_class: MagicMock, sample_domain: dict[str, Any]) -> None:
         """Test QueryResolver initialization."""
         resolver = QueryResolver(sample_domain)
         assert resolver.domain == sample_domain
         assert "test_db" in resolver.system_prompt
 
-    @patch("nl2query.resolver.query_resolver.Agent")
+    @patch("nlseek.resolver.query_resolver.Agent")
     def test_resolver_custom_model(self, mock_agent_class: MagicMock, sample_domain: dict[str, Any]) -> None:
         """Test QueryResolver with custom model."""
         resolver = QueryResolver(sample_domain, model="anthropic:claude-sonnet-4-20250514")
         assert resolver._model == "anthropic:claude-sonnet-4-20250514"
 
-    @patch("nl2query.resolver.query_resolver.Agent")
+    @patch("nlseek.resolver.query_resolver.Agent")
     def test_resolve_sync(self, mock_agent_class: MagicMock, sample_domain: dict[str, Any]) -> None:
         """Test synchronous query resolution."""
         # Setup mock
@@ -275,7 +275,7 @@ class TestQueryResolver:
         assert result.tables_used == ["users"]
         mock_agent.run_sync.assert_called_once_with("Find user with email test@example.com")
 
-    @patch("nl2query.resolver.query_resolver.Agent")
+    @patch("nlseek.resolver.query_resolver.Agent")
     @pytest.mark.asyncio
     async def test_resolve_async(self, mock_agent_class: MagicMock, sample_domain: dict[str, Any]) -> None:
         """Test asynchronous query resolution."""
@@ -303,7 +303,7 @@ class TestQueryResolver:
 class TestQueryResolverWithEcommerceDomain:
     """Tests using the ecommerce domain."""
 
-    @patch("nl2query.resolver.query_resolver.Agent")
+    @patch("nlseek.resolver.query_resolver.Agent")
     def test_resolver_with_ecommerce_domain(
         self, mock_agent_class: MagicMock, ecommerce_domain: dict[str, Any]
     ) -> None:
@@ -315,7 +315,7 @@ class TestQueryResolverWithEcommerceDomain:
         assert "customers" in resolver.system_prompt
         assert "orders" in resolver.system_prompt
 
-    @patch("nl2query.resolver.query_resolver.Agent")
+    @patch("nlseek.resolver.query_resolver.Agent")
     def test_ecommerce_query(self, mock_agent_class: MagicMock, ecommerce_domain: dict[str, Any]) -> None:
         """Test query resolution with ecommerce domain."""
         # Setup mock

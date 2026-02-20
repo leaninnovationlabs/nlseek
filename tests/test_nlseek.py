@@ -1,4 +1,4 @@
-"""Basic tests for nl2query package."""
+"""Basic tests for nlseek package."""
 
 import os
 from pathlib import Path
@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from dotenv import load_dotenv
 
-import nl2query
-from nl2query import DomainLoader, QueryResolver, SQLQueryResult
+import nlseek
+from nlseek import DomainLoader, QueryResolver, SQLQueryResult
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,9 +15,9 @@ load_dotenv()
 
 def test_version():
     """Test that version is defined."""
-    print(nl2query.__version__)
+    print(nlseek.__version__)
     print('--------------------------------')
-    assert nl2query.__version__ == "0.1.0"
+    assert nlseek.__version__ == "0.1.0"
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-# nl2query
+# nlseek
 
 A natural language to SQL query converter.
 
@@ -8,7 +8,7 @@ A natural language to SQL query converter.
 
 ```bash
 # Using uv
-uv pip install nl2query
+uv pip install nlseek
 
 # Or install from source
 uv pip install -e .
@@ -18,8 +18,8 @@ uv pip install -e .
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/nl2query.git
-cd nl2query
+git clone https://github.com/yourusername/nlseek.git
+cd nlseek
 
 # Create virtual environment and install dependencies
 uv venv
@@ -44,7 +44,7 @@ mypy src
 See [examples/domains/ecommerce.yaml](examples/domains/ecommerce.yaml) for a complete domain schema example.
 
 ```python
-from nl2query import DomainLoader, QueryResolver
+from nlseek import DomainLoader, QueryResolver
 
 # Load a domain schema from YAML files
 loader = DomainLoader("/path/to/domains")
@@ -63,7 +63,7 @@ print(result.tables_used)  # Tables referenced
 ### Load domain from JSON string
 
 ```python
-from nl2query import DomainLoader, QueryResolver
+from nlseek import DomainLoader, QueryResolver
 
 # Create a loader without a file path
 loader = DomainLoader()
@@ -95,7 +95,7 @@ result = resolver.resolve("List all users")
 
 ```python
 from pydantic import BaseModel, Field
-from nl2query import DomainLoader, QueryResolver
+from nlseek import DomainLoader, QueryResolver
 
 # Define your models (works with Pydantic, SQLModel, etc.)
 class User(BaseModel):

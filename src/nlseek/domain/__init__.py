@@ -1,8 +1,8 @@
 """Domain module for loading and managing database schema definitions."""
 
-from nl2query.domain.generator import generate_domain
-from nl2query.domain.loader import DomainLoader
-from nl2query.domain.models import (
+from nlseek.domain.generator import generate_domain
+from nlseek.domain.loader import DomainLoader
+from nlseek.domain.models import (
     Column,
     DatabaseType,
     Domain,

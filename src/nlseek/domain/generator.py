@@ -9,7 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 
-from nl2query.domain.models import Column, DatabaseType, Domain, Relationship, Table
+from nlseek.domain.models import Column, DatabaseType, Domain, Relationship, Table
 
 # Mapping from Python types to SQL types
 TYPE_MAPPING: dict[type, str] = {

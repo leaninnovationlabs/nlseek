@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "nl2query"
+name = "nlseek"
 version = "0.1.0"
 description = "A natural language to SQL query converter"
 readme = "README.md"
@@ -42,12 +42,12 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/nl2query"
-Repository = "https://github.com/yourusername/nl2query"
-Issues = "https://github.com/yourusername/nl2query/issues"
+Homepage = "https://github.com/yourusername/nlseek"
+Repository = "https://github.com/yourusername/nlseek"
+Issues = "https://github.com/yourusername/nlseek/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/nl2query"]
+packages = ["src/nlseek"]
 
 [tool.ruff]
 target-version = "py310"

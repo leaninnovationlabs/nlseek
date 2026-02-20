@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from nl2query.domain import DomainLoader, generate_domain
+from nlseek.domain import DomainLoader, generate_domain
 
 
 class User(BaseModel):
