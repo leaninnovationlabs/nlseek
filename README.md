@@ -2,6 +2,8 @@
 
 A natural language to SQL query converter.
 
+![nlseek_preview](./nlseek_preview.gif)
+
 ## Installation
 
 ```bash
