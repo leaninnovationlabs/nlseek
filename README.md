@@ -1,6 +1,6 @@
 # nlseek
 
-A natural language to SQL query converter.
+A natural language to Query converter.
 
 ![nlseek_preview](./nlseek_preview.gif)
 
