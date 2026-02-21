@@ -131,6 +131,13 @@ The generator automatically:
 - Infers relationships from foreign key columns (`user_id` -> `users.id`)
 - Extracts descriptions from docstrings and `Field(description=...)`
 
+## Database Support
+Supports the following Query format right now
+- mysql
+- postgres
+- oracle
+- ansi sql
+
 ## Environment Setup
 
 Create a `.env` file with your Anthropic API key:
