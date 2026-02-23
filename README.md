@@ -131,6 +131,19 @@ The generator automatically:
 - Infers relationships from foreign key columns (`user_id` -> `users.id`)
 - Extracts descriptions from docstrings and `Field(description=...)`
 
+### Quick Demo
+
+The demo loads the [examples/domains/ecommerce.yaml](examples/domains/ecommerce.yaml) schema (customers, products, orders, etc.) and prints the generated SQL, an explanation, and the tables used.
+
+```bash
+# More examples
+uv run tests/demo.py "Top 5 customers by total spending"
+uv run tests/demo.py "Revenue by category for delivered orders"
+
+# Use a different model
+uv run tests/demo.py --model "anthropic:claude-sonnet-4-20250514" "Products with low stock"
+```
+
 ## Database Support
 Supports the following Query format right now
 - mysql
