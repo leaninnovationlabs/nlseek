@@ -1,6 +1,7 @@
 """Query resolver for converting natural language questions to SQL queries."""
 
 from typing import Any
+from uuid import UUID, uuid4
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
@@ -22,6 +23,7 @@ class FilterCondition(BaseModel):
 class SQLQueryResult(BaseModel):
     """Result of a natural language to SQL query conversion."""
 
+    query_id: UUID = Field(default_factory=uuid4, description="Unique identifier for this query result")
     query: str = Field(..., description="The generated SQL query")
     explanation: str = Field(..., description="Brief explanation of what the query does")
     tables_used: list[str] = Field(default_factory=list, description="Tables referenced in the query")

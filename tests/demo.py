@@ -29,6 +29,7 @@ def main() -> None:
     result = resolver.resolve(args.query)
 
     print("\n--- SQL Query ---")
+    print(f"Query ID: {result.query_id}")
     print(result.query)
     print("\n--- Explanation ---")
     print(result.explanation)

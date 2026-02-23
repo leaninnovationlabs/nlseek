@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import UUID
 
 import pytest
 
@@ -109,10 +110,17 @@ class TestSQLQueryResult:
             entities={"john": ["users.email"]},
         )
         print(result)
+        assert isinstance(result.query_id, UUID)
         assert result.query == "SELECT * FROM users"
         assert result.explanation == "Retrieves all users"
         assert result.tables_used == ["users"]
         assert result.entities == {"john": ["users.email"]}
+
+    def test_sql_query_result_unique_ids(self) -> None:
+        """Test that each SQLQueryResult gets a unique query_id."""
+        result1 = SQLQueryResult(query="SELECT 1", explanation="First")
+        result2 = SQLQueryResult(query="SELECT 2", explanation="Second")
+        assert result1.query_id != result2.query_id
 
     def test_sql_query_result_default_tables(self) -> None:
         """Test SQLQueryResult with default empty tables list."""
