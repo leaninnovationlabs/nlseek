@@ -9,7 +9,8 @@ import pytest
 
 from nlseek.domain import DomainLoader
 from nlseek.resolver import FilterCondition, QueryResolver, ResolverConfig, SQLQueryResult
-from nlseek.resolver.query_resolver import DEFAULT_MODEL, _build_system_prompt, _get_database_hints
+from nlseek.resolver.config import DEFAULT_MODEL
+from nlseek.resolver.query_resolver import _build_system_prompt, _get_database_hints
 
 
 @pytest.fixture
