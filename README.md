@@ -133,6 +133,19 @@ The generator automatically:
 - Infers relationships from foreign key columns (`user_id` -> `users.id`)
 - Extracts descriptions from docstrings and `Field(description=...)`
 
+### Configuring the AI Model
+
+By default, `QueryResolver` uses Claude Opus 4. To use a different model, pass a `ResolverConfig`:
+
+```python
+from nlseek import QueryResolver, ResolverConfig
+
+config = ResolverConfig(model="anthropic:claude-sonnet-4-20250514")
+resolver = QueryResolver(domain, config=config)
+```
+
+Any model identifier supported by [pydantic-ai](https://ai.pydantic.dev/models/) can be used but need to have the corresponding API key in the `.env` file.
+
 ### Quick Demo
 
 The demo loads the [examples/domains/ecommerce.yaml](examples/domains/ecommerce.yaml) schema (customers, products, orders, etc.) and prints the generated SQL, explanation, tables used, entities, and filters.
@@ -152,6 +165,7 @@ Each `SQLQueryResult` includes:
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `query_id` | `UUID` | Unique identifier for this query result |
 | `query` | `str` | The generated SQL query |
 | `explanation` | `str` | Brief explanation of what the query does |
 | `tables_used` | `list[str]` | Tables referenced in the query |

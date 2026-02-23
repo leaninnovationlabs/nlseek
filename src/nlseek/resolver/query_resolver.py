@@ -20,6 +20,20 @@ class FilterCondition(BaseModel):
     value: str = Field(..., description="The filter value (e.g. 'iphone', 'electronics')")
 
 
+DEFAULT_MODEL = "anthropic:claude-opus-4-20250514"
+
+
+class ResolverConfig(BaseModel):
+    """Configuration for the QueryResolver.
+
+    Attributes:
+        model: The pydantic-ai model identifier to use for query generation.
+            Defaults to Claude Opus 4.
+    """
+
+    model: str = Field(default=DEFAULT_MODEL, description="The AI model identifier (e.g. 'anthropic:claude-sonnet-4-20250514')")
+
+
 class SQLQueryResult(BaseModel):
     """Result of a natural language to SQL query conversion."""
 
@@ -239,13 +253,15 @@ class QueryResolver:
 
     Args:
         domain: The domain model dictionary containing schema information.
-        model: The AI model to use. Defaults to Claude Opus 4.5.
+        config: Optional resolver configuration. Uses defaults if not provided.
 
     Example:
         >>> from nlseek.domain import DomainLoader
+        >>> from nlseek.resolver import ResolverConfig
         >>> loader = DomainLoader("/path/to/domains")
         >>> domain = loader.get_domain("ecommerce")
-        >>> resolver = QueryResolver(domain)
+        >>> config = ResolverConfig(model="anthropic:claude-sonnet-4-20250514")
+        >>> resolver = QueryResolver(domain, config=config)
         >>> result = resolver.resolve("Show me all orders from last week")
         >>> print(result.query)
     """
@@ -253,16 +269,21 @@ class QueryResolver:
     def __init__(
         self,
         domain: dict[str, Any],
-        model: str = "anthropic:claude-opus-4-20250514",
+        config: ResolverConfig | None = None,
     ) -> None:
+        self._config = config or ResolverConfig()
         self._domain = domain
-        self._model = model
         self._system_prompt = _build_system_prompt(domain)
         self._agent = Agent(
-            model,
+            self._config.model,
             system_prompt=self._system_prompt,
             output_type=SQLQueryResult,
         )
+
+    @property
+    def config(self) -> ResolverConfig:
+        """Return the resolver configuration."""
+        return self._config
 
     @property
     def domain(self) -> dict[str, Any]:

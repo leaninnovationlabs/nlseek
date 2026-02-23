@@ -8,8 +8,8 @@ from uuid import UUID
 import pytest
 
 from nlseek.domain import DomainLoader
-from nlseek.resolver import FilterCondition, QueryResolver, SQLQueryResult
-from nlseek.resolver.query_resolver import _build_system_prompt, _get_database_hints
+from nlseek.resolver import FilterCondition, QueryResolver, ResolverConfig, SQLQueryResult
+from nlseek.resolver.query_resolver import DEFAULT_MODEL, _build_system_prompt, _get_database_hints
 
 
 @pytest.fixture
@@ -350,6 +350,20 @@ class TestDatabaseTypeInPrompt:
         assert "INTERVAL" in prompt
 
 
+class TestResolverConfig:
+    """Tests for ResolverConfig model."""
+
+    def test_default_config(self) -> None:
+        """Test ResolverConfig with all defaults."""
+        config = ResolverConfig()
+        assert config.model == DEFAULT_MODEL
+
+    def test_custom_model(self) -> None:
+        """Test ResolverConfig with a custom model."""
+        config = ResolverConfig(model="openai:gpt-4o")
+        assert config.model == "openai:gpt-4o"
+
+
 class TestQueryResolver:
     """Tests for QueryResolver class."""
 
@@ -361,10 +375,17 @@ class TestQueryResolver:
         assert "test_db" in resolver.system_prompt
 
     @patch("nlseek.resolver.query_resolver.Agent")
-    def test_resolver_custom_model(self, mock_agent_class: MagicMock, sample_domain: dict[str, Any]) -> None:
-        """Test QueryResolver with custom model."""
-        resolver = QueryResolver(sample_domain, model="anthropic:claude-sonnet-4-20250514")
-        assert resolver._model == "anthropic:claude-sonnet-4-20250514"
+    def test_resolver_default_config(self, mock_agent_class: MagicMock, sample_domain: dict[str, Any]) -> None:
+        """Test QueryResolver uses default config when none provided."""
+        resolver = QueryResolver(sample_domain)
+        assert resolver.config.model == DEFAULT_MODEL
+
+    @patch("nlseek.resolver.query_resolver.Agent")
+    def test_resolver_custom_config(self, mock_agent_class: MagicMock, sample_domain: dict[str, Any]) -> None:
+        """Test QueryResolver with custom config."""
+        config = ResolverConfig(model="anthropic:claude-sonnet-4-20250514")
+        resolver = QueryResolver(sample_domain, config=config)
+        assert resolver.config.model == "anthropic:claude-sonnet-4-20250514"
 
     @patch("nlseek.resolver.query_resolver.Agent")
     def test_resolve_sync(self, mock_agent_class: MagicMock, sample_domain: dict[str, Any]) -> None:

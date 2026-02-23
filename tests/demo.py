@@ -20,12 +20,13 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    from nlseek import DomainLoader, QueryResolver
+    from nlseek import DomainLoader, QueryResolver, ResolverConfig
 
     loader = DomainLoader(DOMAINS_DIR)
     domain = loader.get_domain("ecommerce")
 
-    resolver = QueryResolver(domain, model=args.model)
+    config = ResolverConfig(model=args.model)
+    resolver = QueryResolver(domain, config=config)
     result = resolver.resolve(args.query)
 
     print("\n--- SQL Query ---")
