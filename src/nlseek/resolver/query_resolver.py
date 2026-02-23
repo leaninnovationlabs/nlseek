@@ -10,12 +10,33 @@ from pydantic_ai import Agent
 load_dotenv()
 
 
+class FilterCondition(BaseModel):
+    """A single filter condition extracted from the generated SQL WHERE clause."""
+
+    table: str = Field(..., description="The table name (e.g. 'products')")
+    attribute: str = Field(..., description="The column name (e.g. 'name')")
+    operator: str = Field(..., description="The SQL operator (e.g. 'LIKE', '=', '>', 'IN', 'BETWEEN', 'IS NULL')")
+    value: str = Field(..., description="The filter value (e.g. 'iphone', 'electronics')")
+
+
 class SQLQueryResult(BaseModel):
     """Result of a natural language to SQL query conversion."""
 
     query: str = Field(..., description="The generated SQL query")
     explanation: str = Field(..., description="Brief explanation of what the query does")
     tables_used: list[str] = Field(default_factory=list, description="Tables referenced in the query")
+    entities: dict[str, list[str]] = Field(
+        default_factory=dict,
+        description=(
+            "Entities identified from the user's query mapped to the database columns "
+            "they were matched against. Keys are the entity values (e.g. 'iphone'), "
+            "values are lists of fully qualified column names (e.g. ['products.name', 'products.description'])."
+        ),
+    )
+    filters: list[FilterCondition] = Field(
+        default_factory=list,
+        description="Filter conditions extracted from the WHERE clause of the generated SQL query.",
+    )
 
 
 def _get_database_hints(database_type: str) -> list[str]:
@@ -176,6 +197,35 @@ def _build_system_prompt(domain: dict[str, Any]) -> str:
             "- Use table aliases for readability when joining multiple tables",
             "- Return only valid SQL that can be executed",
             "- List all tables that are used in the query",
+            "",
+            "## Entity Identification",
+            "",
+            "Identify all domain-specific entities from the user's question and map each one "
+            "to the database columns it was matched against in the generated SQL query.",
+            "- An entity is any value, keyword, or noun phrase from the user's question that "
+            "corresponds to data stored in the database (e.g. product names, category names, "
+            "status values, customer names).",
+            "- Do NOT include structural/intent words like 'show', 'get', 'find', 'all', 'information'.",
+            "- For each entity, list the fully qualified column names (table.column) that it "
+            "was used to filter or match against in the query.",
+            "- Example: if the user asks 'Get iphone under electronics', the entities would be: "
+            '{"iphone": ["products.name", "products.description"], "electronics": ["categories.name"]}',
+            "",
+            "## Filter Extraction",
+            "",
+            "Extract every filter condition from the WHERE clause of the generated SQL query. "
+            "For each condition, provide:",
+            "- table: the table name the column belongs to (use the actual table name, not the alias)",
+            "- attribute: the column name being filtered on",
+            "- operator: the SQL comparison operator "
+            "(e.g. =, !=, <, >, <=, >=, LIKE, IN, BETWEEN, IS NULL, IS NOT NULL)",
+            "- value: the literal value being compared against "
+            "(without SQL wildcards or quotes)",
+            "",
+            "Example: for `WHERE LOWER(p.name) LIKE '%iphone%' "
+            "AND LOWER(c.name) = 'electronics'`, the filters would be:",
+            '[{"table": "products", "attribute": "name", "operator": "LIKE", "value": "iphone"}, '
+            '{"table": "categories", "attribute": "name", "operator": "=", "value": "electronics"}]',
         ]
     )
 

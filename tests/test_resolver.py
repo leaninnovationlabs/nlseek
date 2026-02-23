@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from nlseek.domain import DomainLoader
-from nlseek.resolver import QueryResolver, SQLQueryResult
+from nlseek.resolver import FilterCondition, QueryResolver, SQLQueryResult
 from nlseek.resolver.query_resolver import _build_system_prompt, _get_database_hints
 
 
@@ -106,11 +106,13 @@ class TestSQLQueryResult:
             query="SELECT * FROM users",
             explanation="Retrieves all users",
             tables_used=["users"],
+            entities={"john": ["users.email"]},
         )
         print(result)
         assert result.query == "SELECT * FROM users"
         assert result.explanation == "Retrieves all users"
         assert result.tables_used == ["users"]
+        assert result.entities == {"john": ["users.email"]}
 
     def test_sql_query_result_default_tables(self) -> None:
         """Test SQLQueryResult with default empty tables list."""
@@ -119,6 +121,98 @@ class TestSQLQueryResult:
             explanation="Test query",
         )
         assert result.tables_used == []
+        assert result.entities == {}
+
+    def test_sql_query_result_entities_multiple_columns(self) -> None:
+        """Test entities mapping to multiple columns."""
+        result = SQLQueryResult(
+            query="SELECT * FROM products WHERE name LIKE '%iphone%' OR description LIKE '%iphone%'",
+            explanation="Search for iphone products",
+            tables_used=["products"],
+            entities={"iphone": ["products.name", "products.description"]},
+        )
+        assert result.entities == {"iphone": ["products.name", "products.description"]}
+
+    def test_sql_query_result_multiple_entities(self) -> None:
+        """Test result with multiple entities."""
+        result = SQLQueryResult(
+            query="SELECT p.* FROM products p JOIN categories c ON p.category_id = c.id",
+            explanation="Get iphone products in electronics",
+            tables_used=["products", "categories"],
+            entities={
+                "iphone": ["products.name", "products.description"],
+                "electronics": ["categories.name"],
+            },
+        )
+        assert len(result.entities) == 2
+        assert "iphone" in result.entities
+        assert "electronics" in result.entities
+        assert result.entities["electronics"] == ["categories.name"]
+
+    def test_sql_query_result_default_filters(self) -> None:
+        """Test SQLQueryResult with default empty filters list."""
+        result = SQLQueryResult(
+            query="SELECT 1",
+            explanation="Test query",
+        )
+        assert result.filters == []
+
+    def test_sql_query_result_single_filter(self) -> None:
+        """Test SQLQueryResult with a single filter condition."""
+        result = SQLQueryResult(
+            query="SELECT * FROM users WHERE email = 'test@example.com'",
+            explanation="Find user by email",
+            tables_used=["users"],
+            filters=[
+                FilterCondition(table="users", attribute="email", operator="=", value="test@example.com"),
+            ],
+        )
+        assert len(result.filters) == 1
+        assert result.filters[0].table == "users"
+        assert result.filters[0].attribute == "email"
+        assert result.filters[0].operator == "="
+        assert result.filters[0].value == "test@example.com"
+
+    def test_sql_query_result_multiple_filters(self) -> None:
+        """Test SQLQueryResult with multiple filter conditions."""
+        result = SQLQueryResult(
+            query="SELECT p.* FROM products p JOIN categories c ON p.category_id = c.id "
+            "WHERE LOWER(p.name) LIKE '%iphone%' AND LOWER(c.name) = 'electronics'",
+            explanation="Get iphone products in electronics",
+            tables_used=["products", "categories"],
+            filters=[
+                FilterCondition(table="products", attribute="name", operator="LIKE", value="iphone"),
+                FilterCondition(table="categories", attribute="name", operator="=", value="electronics"),
+            ],
+        )
+        assert len(result.filters) == 2
+        assert result.filters[0].table == "products"
+        assert result.filters[0].operator == "LIKE"
+        assert result.filters[1].table == "categories"
+        assert result.filters[1].value == "electronics"
+
+
+class TestFilterCondition:
+    """Tests for FilterCondition model."""
+
+    def test_filter_condition_creation(self) -> None:
+        """Test creating a FilterCondition instance."""
+        fc = FilterCondition(table="products", attribute="name", operator="LIKE", value="iphone")
+        assert fc.table == "products"
+        assert fc.attribute == "name"
+        assert fc.operator == "LIKE"
+        assert fc.value == "iphone"
+
+    def test_filter_condition_equality_operator(self) -> None:
+        """Test FilterCondition with equality operator."""
+        fc = FilterCondition(table="categories", attribute="name", operator="=", value="electronics")
+        assert fc.operator == "="
+
+    def test_filter_condition_comparison_operators(self) -> None:
+        """Test FilterCondition with various comparison operators."""
+        for op in [">", "<", ">=", "<=", "!=", "IN", "BETWEEN", "IS NULL", "IS NOT NULL"]:
+            fc = FilterCondition(table="orders", attribute="total", operator=op, value="100")
+            assert fc.operator == op
 
 
 class TestBuildSystemPrompt:
@@ -157,6 +251,18 @@ class TestBuildSystemPrompt:
         """Test that prompt contains custom instructions."""
         prompt = _build_system_prompt(sample_domain)
         assert "Use email for user lookups" in prompt
+
+    def test_prompt_contains_entity_identification(self, sample_domain: dict[str, Any]) -> None:
+        """Test that prompt contains entity identification instructions."""
+        prompt = _build_system_prompt(sample_domain)
+        assert "Entity Identification" in prompt
+        assert "fully qualified column names" in prompt
+
+    def test_prompt_contains_filter_extraction(self, sample_domain: dict[str, Any]) -> None:
+        """Test that prompt contains filter extraction instructions."""
+        prompt = _build_system_prompt(sample_domain)
+        assert "Filter Extraction" in prompt
+        assert "operator" in prompt
 
     def test_prompt_with_ecommerce_domain(self, ecommerce_domain: dict[str, Any]) -> None:
         """Test prompt building with full ecommerce domain."""
@@ -257,10 +363,14 @@ class TestQueryResolver:
         """Test synchronous query resolution."""
         # Setup mock
         mock_result = MagicMock()
-        mock_result.data = SQLQueryResult(
+        mock_result.output = SQLQueryResult(
             query="SELECT * FROM users WHERE email = 'test@example.com'",
             explanation="Finds user by email",
             tables_used=["users"],
+            entities={"test@example.com": ["users.email"]},
+            filters=[
+                FilterCondition(table="users", attribute="email", operator="=", value="test@example.com"),
+            ],
         )
         mock_agent = MagicMock()
         mock_agent.run_sync.return_value = mock_result
@@ -281,10 +391,12 @@ class TestQueryResolver:
         """Test asynchronous query resolution."""
         # Setup mock
         mock_result = MagicMock()
-        mock_result.data = SQLQueryResult(
+        mock_result.output = SQLQueryResult(
             query="SELECT p.* FROM posts p JOIN users u ON p.user_id = u.id",
             explanation="Gets all posts with user info",
             tables_used=["posts", "users"],
+            entities={},
+            filters=[],
         )
         mock_agent = MagicMock()
         mock_agent.run = AsyncMock(return_value=mock_result)
@@ -320,7 +432,7 @@ class TestQueryResolverWithEcommerceDomain:
         """Test query resolution with ecommerce domain."""
         # Setup mock
         mock_result = MagicMock()
-        mock_result.data = SQLQueryResult(
+        mock_result.output = SQLQueryResult(
             query="""
                 SELECT o.* FROM orders o
                 JOIN customers c ON o.customer_id = c.id
@@ -328,6 +440,10 @@ class TestQueryResolverWithEcommerceDomain:
             """,
             explanation="Gets all orders for a customer by email",
             tables_used=["orders", "customers"],
+            entities={"customer@example.com": ["customers.email"]},
+            filters=[
+                FilterCondition(table="customers", attribute="email", operator="=", value="customer@example.com"),
+            ],
         )
         mock_agent = MagicMock()
         mock_agent.run_sync.return_value = mock_result

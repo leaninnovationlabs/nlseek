@@ -2,7 +2,6 @@
 """CLI demo script for nlseek — converts natural language to SQL."""
 
 import argparse
-import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -35,6 +34,10 @@ def main() -> None:
     print(result.explanation)
     print("\n--- Tables Used ---")
     print(", ".join(result.tables_used))
+    print("\n--- Entities ---")
+    print(result.entities)
+    print("\n--- Filters ---")
+    print(result.filters)
 
 
 if __name__ == "__main__":

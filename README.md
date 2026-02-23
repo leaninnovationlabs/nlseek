@@ -58,6 +58,8 @@ result = resolver.resolve("Show me all orders from last week")
 print(result.query)        # The generated SQL query
 print(result.explanation)  # Explanation of the query
 print(result.tables_used)  # Tables referenced
+print(result.entities)     # Entities identified from the question mapped to columns
+print(result.filters)      # Filter conditions extracted from the WHERE clause
 ```
 
 ### Load domain from JSON string
@@ -133,7 +135,7 @@ The generator automatically:
 
 ### Quick Demo
 
-The demo loads the [examples/domains/ecommerce.yaml](examples/domains/ecommerce.yaml) schema (customers, products, orders, etc.) and prints the generated SQL, an explanation, and the tables used.
+The demo loads the [examples/domains/ecommerce.yaml](examples/domains/ecommerce.yaml) schema (customers, products, orders, etc.) and prints the generated SQL, explanation, tables used, entities, and filters.
 
 ```bash
 # More examples
@@ -142,6 +144,49 @@ uv run tests/demo.py "Revenue by category for delivered orders"
 
 # Use a different model
 uv run tests/demo.py --model "anthropic:claude-sonnet-4-20250514" "Products with low stock"
+```
+
+## Response Fields
+
+Each `SQLQueryResult` includes:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `query` | `str` | The generated SQL query |
+| `explanation` | `str` | Brief explanation of what the query does |
+| `tables_used` | `list[str]` | Tables referenced in the query |
+| `entities` | `dict[str, list[str]]` | Entities from the question mapped to the columns they match |
+| `filters` | `list[FilterCondition]` | Filter conditions extracted from the WHERE clause |
+
+### Entities
+
+Maps domain-specific values from the user's question to the database columns they were matched against. For example, for the question *"Get me information about iphone under electronics"*:
+
+```json
+{
+  "iphone": ["products.name", "products.description"],
+  "electronics": ["categories.name"]
+}
+```
+
+### Filters
+
+Each `FilterCondition` contains:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `table` | `str` | Table name (e.g. `products`) |
+| `attribute` | `str` | Column name (e.g. `name`) |
+| `operator` | `str` | SQL operator (e.g. `LIKE`, `=`, `>`, `IN`, `BETWEEN`) |
+| `value` | `str` | The filter value (e.g. `iphone`, `electronics`) |
+
+For the same query above, the filters would be:
+
+```json
+[
+  {"table": "products", "attribute": "name", "operator": "LIKE", "value": "iphone"},
+  {"table": "categories", "attribute": "name", "operator": "=", "value": "electronics"}
+]
 ```
 
 ## Database Support
