@@ -18,7 +18,7 @@ uv pip install -e .
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/nlseek.git
+git clone https://github.com/leaninnovationlabs/nlseek.git
 cd nlseek
 
 # Create virtual environment and install dependencies
