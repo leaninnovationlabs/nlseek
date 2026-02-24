@@ -35,6 +35,12 @@ ruff format src tests
 
 # Type checking
 mypy src
+
+
+# Build the package
+uv run python -m build
+uv run twine check dist/*
+
 ```
 
 ## Usage
