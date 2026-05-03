@@ -71,6 +71,7 @@ warn_unused_configs = true
 constraint-dependencies = [
     "authlib>=1.7.0",  # Fix multiple CVEs: CVE-2026-28490, CVE-2026-28498, CVE-2026-28802, CVE-2025-68158
     "protobuf>=6.33.5",  # Fix CVE-2026-0994 (DoS via uncontrolled recursion in ParseDict)
+    "cryptography>=46.0.7",  # Fix CVE-2026-34073 (cert validation bypass), CVE-2026-39892 (buffer overflow), CVE-2026-26007 (EC info disclosure)
 ]
 
 [tool.pytest.ini_options]
