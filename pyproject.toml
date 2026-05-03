@@ -31,7 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0.3",  # Fix CVE-2025-71176 (predictable tmpdir symlink attack)
     "pytest-asyncio>=0.23",
     "pytest-cov>=4.0",
     "ruff>=0.4",
