@@ -67,6 +67,11 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 
+[tool.uv]
+constraint-dependencies = [
+    "authlib>=1.7.0",  # Fix multiple CVEs: CVE-2026-28490, CVE-2026-28498, CVE-2026-28802, CVE-2025-68158
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
