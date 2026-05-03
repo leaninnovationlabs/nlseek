@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.0",
-    "pydantic-ai[anthropic]>=0.0.30",
+    "pydantic-ai[anthropic]>=1.56.0",  # Fix CVE-2026-25580 (SSRF) and CVE-2026-25640 (path traversal)
     "python-dotenv>=1.0",
     "pyyaml>=6.0",
 ]
