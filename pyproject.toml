@@ -24,14 +24,14 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.0",
-    "pydantic-ai[anthropic]>=0.0.30",
-    "python-dotenv>=1.0",
+    "pydantic-ai[anthropic]>=1.56.0",  # Fix CVE-2026-25580 (SSRF) and CVE-2026-25640 (path traversal)
+    "python-dotenv>=1.2.2",  # Fix CVE-2026-28684 (symlink following in set_key)
     "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0.3",  # Fix CVE-2025-71176 (predictable tmpdir symlink attack)
     "pytest-asyncio>=0.23",
     "pytest-cov>=4.0",
     "ruff>=0.4",
@@ -66,6 +66,18 @@ python_version = "3.10"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
+[tool.uv]
+constraint-dependencies = [
+    "authlib>=1.7.0",  # Fix multiple CVEs: CVE-2026-28490, CVE-2026-28498, CVE-2026-28802, CVE-2025-68158
+    "protobuf>=6.33.5",  # Fix CVE-2026-0994 (DoS via uncontrolled recursion in ParseDict)
+    "cryptography>=46.0.7",  # Fix CVE-2026-34073 (cert validation bypass), CVE-2026-39892 (buffer overflow), CVE-2026-26007 (EC info disclosure)
+    "pyasn1>=0.6.3",  # Fix CVE-2026-30922 (uncontrolled recursion DoS) and CVE-2026-23490 (memory exhaustion DoS)
+    "pyjwt>=2.12.0",  # Fix CVE-2026-32597 (insufficient crit header validation, auth bypass)
+    "aiohttp>=3.13.4",  # Fix CVE-2026-22815 (trailer headers DoS), CVE-2026-34516 (multipart header bypass), SSRF on Windows
+    "python-multipart>=0.0.26",  # Fix CVE-2026-40347 (DoS via large multipart preamble/epilogue)
+    "requests>=2.33.0",  # Fix CVE-2026-25645 (insecure temp file reuse in extract_zipped_paths)
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
