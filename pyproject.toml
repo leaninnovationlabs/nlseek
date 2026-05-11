@@ -77,6 +77,7 @@ constraint-dependencies = [
     "aiohttp>=3.13.4",  # Fix CVE-2026-22815 (trailer headers DoS), CVE-2026-34516 (multipart header bypass), SSRF on Windows
     "python-multipart>=0.0.26",  # Fix CVE-2026-40347 (DoS via large multipart preamble/epilogue)
     "requests>=2.33.0",  # Fix CVE-2026-25645 (insecure temp file reuse in extract_zipped_paths)
+    "urllib3>=2.7.0",  # Fix GHSA-mf9v-mfxr-j63j (decompression-bomb bypass) and GHSA-qccp-gfcp-xxvc (sensitive header leak on proxy redirect)
 ]
 
 [tool.pytest.ini_options]
