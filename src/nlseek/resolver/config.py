@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 
-DEFAULT_MODEL = "anthropic:claude-opus-4-20250514"
+DEFAULT_MODEL = "anthropic:claude-opus-4-8"
 
 
 class ResolverConfig(BaseModel):
