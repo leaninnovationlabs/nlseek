@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.0",
-    "pydantic-ai[anthropic]>=1.99.0",  # Fix CVE-2026-25580 (SSRF), CVE-2026-25640 (path traversal), and IPv4-mapped IPv6 SSRF bypass
+    "pydantic-ai>=1.106.0,<2",  # Fix CVE-2026-54249 (unvalidated UploadedFile in UI adapters); stay on 1.x
     "python-dotenv>=1.2.2",  # Fix CVE-2026-28684 (symlink following in set_key)
     "pyyaml>=6.0",
 ]
@@ -71,12 +71,13 @@ warn_unused_configs = true
 constraint-dependencies = [
     "authlib>=1.7.1",  # Fix multiple CVEs: CVE-2026-28490, CVE-2026-28498, CVE-2026-28802, CVE-2025-68158, plus OIDC open redirect
     "protobuf>=6.33.5",  # Fix CVE-2026-0994 (DoS via uncontrolled recursion in ParseDict)
-    "cryptography>=48.0.1",  # Fix CVE-2026-34073 (cert validation bypass), CVE-2026-39892 (buffer overflow), CVE-2026-26007 (EC info disclosure)
+    "cryptography>=50.0.0",  # Fix CVE-2026-69247 (PKCS#7 Bleichenbacher oracle), plus prior cert/buffer/EC CVEs
     "pyasn1>=0.6.4",  # Fix CVE-2026-30922, CVE-2026-23490, CVE-2026-59885 (OID DoS), CVE-2026-59886 (REAL DoS)
     "joserfc>=1.6.8",  # Fix CVE-2026-49852 (empty HMAC key) and CVE-2026-48990 (b64=false payload-size bypass)
     "mcp>=1.28.1",  # Fix task cross-session access, HTTP session principal binding, WebSocket Host/Origin validation
     "pyjwt>=2.13.0",  # Fix CVE-2026-32597 (insufficient crit header validation, auth bypass)
-    "aiohttp>=3.14.1",  # Fix CVE-2026-22815 (trailer headers DoS), CVE-2026-34516 (multipart header bypass), SSRF on Windows
+    "aiohttp>=3.14.3",  # Fix CVE-2026-69244 (OOB heap read), CVE-2026-59881 (WS compress), CVE-2026-69243 (WS smuggling), plus prior CVEs
+    "anthropic>=0.105.0,<1",  # Keep anthropic 0.x; 1.0 requires httpx2 and breaks pydantic-ai provider wiring
     "python-multipart>=0.0.31",  # Fix CVE-2026-40347 (DoS via large multipart preamble/epilogue)
     "pydantic-settings>=2.14.2",
     "starlette>=1.3.1",
