@@ -88,6 +88,9 @@ constraint-dependencies = [
     "anyio>=4.14.2",  # Fix CVE-2026-63374 (TLSStream IDNA 2003 cert spoofing), CVE-2026-64847 (process-pool stderr hang)
     "multidict>=6.9.1",  # Fix CVE-2026-104874 (items-view reference leak)
     "opentelemetry-api>=1.45.1",  # Fix CVE-2026-114603 (unbounded tracestate parsing)
+    "fastmcp>=3.4.10",  # Fix GHSA-7xgj-8392-5q4r (post-transform component authorization skipped on direct calls)
+    "fastmcp-slim>=3.4.10",  # Fix GHSA-7xgj-8392-5q4r
+    "filelock>=4.2.1",  # Fix CVE-2026-112940 (ReadWriteLock symlink/journal overwrite), CVE-2026-112907/112913 (Windows side-file/oplock)
 ]
 
 [tool.pytest.ini_options]
