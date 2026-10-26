@@ -24,7 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.0",
-    "pydantic-ai>=1.106.0,<2",  # Fix CVE-2026-54249 (unvalidated UploadedFile in UI adapters); stay on 1.x
+    "pydantic-ai>=1.107.7,<2",  # Fix CVE-2026-54249, CVE-2026-107287/107289/107290/107291 (SSRF bypass, web_fetch DoS, OTel content leak); stay on 1.x
     "python-dotenv>=1.2.2",  # Fix CVE-2026-28684 (symlink following in set_key)
     "pyyaml>=6.0",
 ]
@@ -74,17 +74,20 @@ constraint-dependencies = [
     "cryptography>=50.0.0",  # Fix CVE-2026-69247 (PKCS#7 Bleichenbacher oracle), plus prior cert/buffer/EC CVEs
     "pyasn1>=0.6.4",  # Fix CVE-2026-30922, CVE-2026-23490, CVE-2026-59885 (OID DoS), CVE-2026-59886 (REAL DoS)
     "joserfc>=1.6.8",  # Fix CVE-2026-49852 (empty HMAC key) and CVE-2026-48990 (b64=false payload-size bypass)
-    "mcp>=1.28.1",  # Fix task cross-session access, HTTP session principal binding, WebSocket Host/Origin validation
-    "pyjwt>=2.13.0",  # Fix CVE-2026-32597 (insufficient crit header validation, auth bypass)
-    "aiohttp>=3.14.3",  # Fix CVE-2026-69244 (OOB heap read), CVE-2026-59881 (WS compress), CVE-2026-69243 (WS smuggling), plus prior CVEs
+    "mcp>=1.30.0",  # Fix CVE-2026-59951 (StreamableHTTP session accumulation), plus prior session/WebSocket fixes
+    "pyjwt>=2.15.0",  # Fix CVE-2026-102268 (HS/asymmetric key confusion), CVE-2026-101917..103001 (HMAC key bypasses, JWKS redirects, DoS)
+    "aiohttp>=3.14.4",  # Fix CVE-2026-111063..111750, GHSA-2g87-pp6c-29x5 (resource exhaustion, request smuggling, cookie scope), plus prior CVEs
     "anthropic>=0.105.0,<1",  # Keep anthropic 0.x; 1.0 requires httpx2 and breaks pydantic-ai provider wiring
     "python-multipart>=0.0.31",  # Fix CVE-2026-40347 (DoS via large multipart preamble/epilogue)
     "pydantic-settings>=2.14.2",
     "starlette>=1.3.1",
     "requests>=2.33.0",  # Fix CVE-2026-25645 (insecure temp file reuse in extract_zipped_paths)
-    "urllib3>=2.7.0",  # Fix GHSA-mf9v-mfxr-j63j (decompression-bomb bypass) and GHSA-qccp-gfcp-xxvc (sensitive header leak on proxy redirect)
+    "urllib3>=2.8.0",  # Fix CVE-2026-97687/97688/97689 (proxy TLS config, unbounded chunk line, deflate loop), plus prior GHSAs
     "idna>=3.15",  # Fix CVE-2024-3651 bypass via specially crafted inputs to idna.encode()
     "pygments>=2.20.0",  # Fix ReDoS via inefficient regex for GUID matching
+    "anyio>=4.14.2",  # Fix CVE-2026-63374 (TLSStream IDNA 2003 cert spoofing), CVE-2026-64847 (process-pool stderr hang)
+    "multidict>=6.9.1",  # Fix CVE-2026-104874 (items-view reference leak)
+    "opentelemetry-api>=1.45.1",  # Fix CVE-2026-114603 (unbounded tracestate parsing)
 ]
 
 [tool.pytest.ini_options]
